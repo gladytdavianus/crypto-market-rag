@@ -1,0 +1,36 @@
+# --- secrets & environment ---------------------------------------------
+.env
+.envrc.local
+
+# --- Python ------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# --- Poetry --------------------------------------------------------------
+.venv/
+
+# --- direnv ------------------------------------------------------------
+.direnv/
+
+# --- testing / coverage --------------------------------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# --- data & notebooks (gitignored sesuai struktur project) ---------------
+data/*
+!data/.gitkeep
+notebooks/.ipynb_checkpoints/
+
+# --- IDE -----------------------------------------------------------------
+.vscode/
+.idea/
+
+# --- OS --------------------------------------------------------------
+.DS_Store
