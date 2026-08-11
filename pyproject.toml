@@ -29,6 +29,7 @@ dependencies = [
   # --- ingestion -----------------------------------------------------------
   "feedparser>=6.0,<7.0",            # RSS feed parsing, used in ingestion/news_scraper.py
   "requests>=2.32,<3.0",             # HTTP client, used in ingestion/coin_description.py
+  "beautifulsoup4>=4.12,<5.0",       # strip HTML from RSS summaries, used in ingestion/news_scraper.py
 ]
 
 # --- orchestration (Phase 1, step 7) --------------------------------------

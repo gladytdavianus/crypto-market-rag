@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import feedparser
+from bs4 import BeautifulSoup
 
 from src.ingestion.base import BaseIngestionSource
 from src.schemas import RawDocument
@@ -10,8 +11,22 @@ from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
-# CoinDesk's public RSS feed — free, no API key required.
-DEFAULT_RSS_URL = "https://www.coindesk.com/arc/outboundfeeds/rss/"
+# CoinTelegraph's public RSS feed - free, no API key required.
+# Note: CoinDesk's RSS was tried first but their summary/content fields
+# come back empty (headline-only feed, no article body). CoinTelegraph's
+# feed includes a full summary, so it was used instead.
+DEFAULT_RSS_URL = "https://cointelegraph.com/rss"
+
+
+def _strip_html(html: str) -> str:
+    """Convert HTML content to plain text.
+
+    RSS summaries often come as raw HTML (e.g. wrapped in <p> tags, with
+    embedded <img> elements). Chunking/embedding raw HTML would waste tokens
+    on markup and dilute the actual semantic content, so this strips tags
+    and keeps only the visible text.
+    """
+    return BeautifulSoup(html, "html.parser").get_text(separator=" ", strip=True)
 
 
 class CryptoNewsSource(BaseIngestionSource):
@@ -19,7 +34,7 @@ class CryptoNewsSource(BaseIngestionSource):
 
     This is the concrete example referenced in the roadmap alongside
     BaseIngestionSource. It fetches entries from a public RSS feed (default:
-    CoinDesk) and normalizes each entry into a RawDocument.
+    CoinTelegraph) and normalizes each entry into a RawDocument.
 
     Deliberately generic: entity_type is "news_article", not tied to any
     specific coin. A single article can mention multiple coins, or none —
@@ -63,7 +78,8 @@ class CryptoNewsSource(BaseIngestionSource):
         if entry.get("published_parsed"):
             published_at = datetime(*entry["published_parsed"][:6], tzinfo=timezone.utc)
 
-        content = entry.get("summary") or entry.get("description") or ""
+        raw_content = entry.get("summary") or entry.get("description") or ""
+        content = _strip_html(raw_content)
 
         tags = [tag.get("term") for tag in entry.get("tags", []) if tag.get("term")]
 
