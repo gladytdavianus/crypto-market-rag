@@ -38,6 +38,46 @@ def _get_latest_prices(coin_ids: list[str]) -> list[dict]:
     return [dict(zip(columns, row)) for row in rows]
 
 
+def get_top_movers(limit: int = 5) -> list[dict]:
+    """Compute 24h price change % per coin from fact_coin_prices.
+
+    Deliberately computed via SQL, not asked from the LLM: percentage
+    changes are precise numbers, and LLMs are unreliable at arithmetic over
+    text context. This keeps DailyReportResponse.top_movers trustworthy —
+    the LLM only generates the narrative parts (summary, sentiment), never
+    the numbers themselves.
+
+    Uses the two most recent price snapshots per coin. Coins with fewer
+    than two snapshots (nothing to compare against) are excluded.
+    """
+    with psycopg.connect(settings.postgres_dsn) as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            WITH ranked AS (
+                SELECT coin_id, price_usd, price_date,
+                       ROW_NUMBER() OVER (PARTITION BY coin_id ORDER BY price_date DESC) AS rn
+                FROM fact_coin_prices
+            )
+            SELECT latest.coin_id, latest.price_usd, previous.price_usd
+            FROM ranked AS latest
+            JOIN ranked AS previous
+                ON latest.coin_id = previous.coin_id AND previous.rn = 2
+            WHERE latest.rn = 1
+            """
+        )
+        rows = cur.fetchall()
+
+    movers = []
+    for coin_id, latest_price, previous_price in rows:
+        if not previous_price:
+            continue
+        change_pct = float((latest_price - previous_price) / previous_price * 100)
+        movers.append({"coin_id": coin_id, "change_pct": round(change_pct, 2)})
+
+    movers.sort(key=lambda m: abs(m["change_pct"]), reverse=True)
+    return movers[:limit]
+
+
 def retrieve_context(query: str, top_k: int = 5) -> dict:
     """Retrieve everything needed to answer `query`.
 
