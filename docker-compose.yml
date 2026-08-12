@@ -1,0 +1,80 @@
+x-airflow-common: &airflow-common
+  build: .
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres_airflow_rag:5432/airflow
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__LOGGING__LOGGING_LEVEL: INFO
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+    PYTHONPATH: /opt/airflow
+    # rag_src/utils/config.py reads these directly (pydantic-settings).
+    # POSTGRES_HOST is the container_name of crypto-market-pipeline's
+    # Postgres, reachable here because both are attached to crypto_shared_net.
+    POSTGRES_HOST: crypto_postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_DB: ${POSTGRES_DB}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Ollama runs on the HOST (laptop), not in any container.
+    OLLAMA_HOST: http://host.docker.internal:11434
+    OLLAMA_EMBEDDING_MODEL: nomic-embed-text
+    OLLAMA_CHAT_MODEL: llama3.1:8b
+    LOG_LEVEL: INFO
+    ENVIRONMENT: production
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./rag_src:/opt/airflow/rag_src
+    - ./data:/opt/airflow/data
+    - ./logs:/opt/airflow/logs
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    postgres_airflow_rag:
+      condition: service_healthy
+  networks:
+    - default
+    - crypto_shared_net
+
+services:
+  postgres_airflow_rag:
+    image: postgres:16
+    container_name: airflow_postgres_rag
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_postgres_rag_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command: -c "airflow db migrate && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true"
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8081:8080"
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+
+volumes:
+  airflow_postgres_rag_data:
+
+networks:
+  default:
+  crypto_shared_net:
+    # Created by crypto-market-pipeline's docker-compose.yml. Start that
+    # project first, or this network won't exist yet.
+    external: true
