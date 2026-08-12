@@ -1,9 +1,9 @@
 import psycopg
 
-from src.ingestion.base import BaseIngestionSource
-from src.schemas import RawDocument
-from src.utils.config import settings
-from src.utils.logger import setup_logger
+from rag_src.ingestion.base import BaseIngestionSource
+from rag_src.schemas import RawDocument
+from rag_src.utils.config import settings
+from rag_src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

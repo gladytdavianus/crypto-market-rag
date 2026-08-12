@@ -1,8 +1,8 @@
 import typer
 from rich.console import Console
 
-from src.generation.query_answer import answer_query
-from src.generation.report_generator import generate_daily_report
+from rag_src.generation.query_answer import answer_query
+from rag_src.generation.report_generator import generate_daily_report
 
 app = typer.Typer(help="crypto-market-rag: manual query and report generation via terminal")
 console = Console()

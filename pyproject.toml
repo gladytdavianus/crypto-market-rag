@@ -20,11 +20,11 @@ dependencies = [
   "tiktoken>=0.7,<0.8",              # token counting for chunking strategy
 
   # --- CLI -----------------------------------------------------------------
-  "typer>=0.12,<0.13",               # used in src/cli/main.py
+  "typer>=0.12,<0.13",               # used in rag_src/cli/main.py
   "rich>=13.7,<14.0",                # nicer CLI output
 
   # --- logging -----------------------------------------------------------
-  "structlog>=24.1,<25.0",           # used in src/utils/logger.py, structured logging
+  "structlog>=24.1,<25.0",           # used in rag_src/utils/logger.py, structured logging
 
   # --- ingestion -----------------------------------------------------------
   "feedparser>=6.0,<7.0",            # RSS feed parsing, used in ingestion/news_scraper.py
@@ -37,7 +37,7 @@ dependencies = [
 # Reason: Airflow ships its own dependency constraint file per Python version,
 # and is normally installed in its own Airflow image/container (not in the
 # local dev venv alongside the application code). dags/*.py just imports from
-# src/ at runtime inside the Airflow container. Confirmed by the previous
+# rag_src/ at runtime inside the Airflow container. Confirmed by the previous
 # project (crypto-market-pipeline): Airflow runs from Docker directly, never
 # added to that project's pyproject.toml either — same pattern here.
 
@@ -70,4 +70,4 @@ disallow_untyped_defs = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --cov=src --cov-report=term-missing"
+addopts = "-v --cov=rag_src --cov-report=term-missing"

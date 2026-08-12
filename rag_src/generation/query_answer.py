@@ -3,10 +3,10 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from src.generation.llm_client import generate_structured
-from src.retrieval.hybrid_retriever import retrieve_context
-from src.schemas import RAGResponse
-from src.utils.logger import setup_logger
+from rag_src.generation.llm_client import generate_structured
+from rag_src.retrieval.hybrid_retriever import retrieve_context
+from rag_src.schemas import RAGResponse
+from rag_src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

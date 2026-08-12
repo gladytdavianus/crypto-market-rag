@@ -5,9 +5,9 @@ from typing import Any
 import feedparser
 from bs4 import BeautifulSoup
 
-from src.ingestion.base import BaseIngestionSource
-from src.schemas import RawDocument
-from src.utils.logger import setup_logger
+from rag_src.ingestion.base import BaseIngestionSource
+from rag_src.schemas import RawDocument
+from rag_src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

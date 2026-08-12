@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.schemas import RawDocument
+from rag_src.schemas import RawDocument
 
 
 class BaseIngestionSource(ABC):
