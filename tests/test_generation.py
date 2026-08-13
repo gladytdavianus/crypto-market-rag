@@ -60,8 +60,20 @@ def test_generate_daily_report_numbers_come_from_sql_not_llm(mocker):
 def test_answer_query_filters_coins_mentioned_from_documents(mocker):
     fake_context = {
         "documents": [
-            {"entity_type": "coin", "entity_id": "bitcoin", "title": "t", "content": "c", "source_url": None},
-            {"entity_type": "news_article", "entity_id": "abc", "title": "t", "content": "c", "source_url": None},
+            {
+                "entity_type": "coin",
+                "entity_id": "bitcoin",
+                "title": "t",
+                "content": "c",
+                "source_url": None,
+            },
+            {
+                "entity_type": "news_article",
+                "entity_id": "abc",
+                "title": "t",
+                "content": "c",
+                "source_url": None,
+            },
         ],
         "price_data": [],
     }

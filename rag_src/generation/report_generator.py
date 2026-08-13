@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel
@@ -69,7 +69,7 @@ def generate_daily_report(query: str = "crypto market summary today") -> DailyRe
     ]
 
     report = DailyReportResponse(
-        report_date=datetime.now(timezone.utc),
+        report_date=datetime.now(UTC),
         summary=narrative.summary,
         top_movers=top_movers,
         market_sentiment=narrative.market_sentiment,

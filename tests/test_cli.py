@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from typer.testing import CliRunner
 
@@ -14,7 +14,7 @@ def test_query_command_prints_answer_and_sources(mocker):
         confidence="high",
         sources=[{"type": "news_article", "title": "News", "url": "https://x.com"}],
         coins_mentioned=["bitcoin"],
-        generated_at=datetime.now(timezone.utc),
+        generated_at=datetime.now(UTC),
         query="q",
     )
     mocker.patch("rag_src.cli.main.answer_query", return_value=fake_response)
@@ -28,7 +28,7 @@ def test_query_command_prints_answer_and_sources(mocker):
 
 def test_report_command_prints_top_movers(mocker):
     fake_report = DailyReportResponse(
-        report_date=datetime.now(timezone.utc),
+        report_date=datetime.now(UTC),
         summary="Calm day.",
         top_movers=[{"coin_id": "bitcoin", "change_pct": 3.3}],
         market_sentiment="neutral",

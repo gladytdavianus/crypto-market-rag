@@ -15,7 +15,8 @@ def start_ingestion_run(source_name: str) -> int:
     """
     with psycopg.connect(settings.postgres_dsn) as conn, conn.cursor() as cur:
         cur.execute(
-            "INSERT INTO rag.ingestion_runs (source_name, status) VALUES (%s, 'running') RETURNING id",
+            "INSERT INTO rag.ingestion_runs (source_name, status) "
+            "VALUES (%s, 'running') RETURNING id",
             (source_name,),
         )
         run_id = cur.fetchone()[0]

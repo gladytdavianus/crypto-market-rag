@@ -1,5 +1,5 @@
 import hashlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import feedparser
@@ -76,7 +76,7 @@ class CryptoNewsSource(BaseIngestionSource):
 
         published_at = None
         if entry.get("published_parsed"):
-            published_at = datetime(*entry["published_parsed"][:6], tzinfo=timezone.utc)
+            published_at = datetime(*entry["published_parsed"][:6], tzinfo=UTC)
 
         raw_content = entry.get("summary") or entry.get("description") or ""
         content = _strip_html(raw_content)

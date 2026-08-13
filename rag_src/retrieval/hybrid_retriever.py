@@ -35,7 +35,7 @@ def _get_latest_prices(coin_ids: list[str]) -> list[dict]:
         rows = cur.fetchall()
         columns = [desc[0] for desc in cur.description]
 
-    return [dict(zip(columns, row)) for row in rows]
+    return [dict(zip(columns, row, strict=True)) for row in rows]
 
 
 def get_top_movers(limit: int = 5) -> list[dict]:

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel
@@ -74,7 +74,7 @@ def answer_query(query: str, top_k: int = 5) -> RAGResponse:
         confidence=narrative.confidence,
         sources=sources,
         coins_mentioned=coins_mentioned,
-        generated_at=datetime.now(timezone.utc),
+        generated_at=datetime.now(UTC),
         query=query,
     )
 

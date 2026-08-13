@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -14,7 +14,7 @@ def sample_document() -> RawDocument:
         title="Bitcoin Overview",
         content="Bitcoin is a decentralized digital currency. " * 20,
         source_url="https://example.com/bitcoin",
-        published_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+        published_at=datetime(2026, 1, 1, tzinfo=UTC),
         metadata={"symbol": "btc"},
     )
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -36,14 +36,14 @@ def test_rag_response_rejects_invalid_confidence_value():
             confidence="super-high",
             sources=[],
             coins_mentioned=[],
-            generated_at=datetime.now(timezone.utc),
+            generated_at=datetime.now(UTC),
             query="q",
         )
 
 
 def test_daily_report_response_valid_construction():
     report = DailyReportResponse(
-        report_date=datetime.now(timezone.utc),
+        report_date=datetime.now(UTC),
         summary="Market is calm.",
         top_movers=[{"coin_id": "bitcoin", "change_pct": 1.5}],
         market_sentiment="neutral",

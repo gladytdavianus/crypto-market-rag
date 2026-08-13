@@ -59,6 +59,6 @@ def search_similar(
         rows = cur.fetchall()
         columns = [desc[0] for desc in cur.description]
 
-    results = [dict(zip(columns, row)) for row in rows]
+    results = [dict(zip(columns, row, strict=True)) for row in rows]
     logger.info("vector_search_completed", query=query, result_count=len(results))
     return results
