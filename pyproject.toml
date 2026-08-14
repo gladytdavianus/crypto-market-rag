@@ -42,7 +42,7 @@ dependencies = [
 # added to that project's pyproject.toml either — same pattern here.
 
 [tool.poetry]
-package-mode = false
+packages = [{ include = "rag_src" }]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2"
