@@ -23,7 +23,12 @@ class _AnswerNarrative(BaseModel):
     confidence: Literal["high", "medium", "low"]
 
 
-def _build_prompt(query: str, documents: list[dict], price_data: list[dict]) -> str:
+def _build_prompt(
+    query: str,
+    documents: list[dict],
+    price_data: list[dict],
+    history: list[dict] | None = None,
+) -> str:
     context_text = "\n\n".join(
         f"[{doc['entity_type']}] {doc['title']}\n{doc['content']}" for doc in documents
     ) or "No relevant context found."
@@ -32,10 +37,15 @@ def _build_prompt(query: str, documents: list[dict], price_data: list[dict]) -> 
         f"- {p['coin_id']}: ${p['price_usd']} (as of {p['price_date']})" for p in price_data
     ) or "No price data available."
 
+    history_text = ""
+    if history:
+        history_lines = "\n".join(f"{h['role']}: {h['message']}" for h in history)
+        history_text = f"\nPrevious conversation (for context, most recent last):\n{history_lines}\n"
+
     return f"""You are a crypto market analyst. Answer the user's question using
 ONLY the context and price data below. If the context doesn't contain enough
 information to answer confidently, say so and use "low" confidence.
-
+{history_text}
 Question: {query}
 
 Relevant context:
@@ -47,17 +57,27 @@ Current price data:
 Respond with a concise, factual answer grounded in the context above."""
 
 
-def answer_query(query: str, top_k: int = 5) -> RAGResponse:
+def answer_query(
+    query: str,
+    top_k: int = 5,
+    history: list[dict] | None = None,
+) -> RAGResponse:
     """Answer a free-text query about the crypto market, as a RAGResponse.
 
-    This is the function meant to be reused across interfaces (CLI now,
-    web app/Telegram bot in Fase 2) — none of them should reimplement this
-    orchestration themselves, per the project guide's "reuse penuh module,
-    tanpa duplikasi logic" principle.
+    This is the function meant to be reused across interfaces (CLI, Telegram
+    bot) — none of them should reimplement this orchestration themselves,
+    per the project guide's "reuse penuh module, tanpa duplikasi logic"
+    principle.
+
+    `history` is optional short-term conversational context (e.g. from
+    rag.chat_history, exact retrieval by session_id — not vector search).
+    Each item shapes like {"role": "user"|"assistant", "message": str}.
+    The CLI doesn't pass this (stateless, one query = one answer); the
+    Telegram bot does, for multi-turn conversations within a session.
     """
     context = retrieve_context(query, top_k=top_k)
 
-    prompt = _build_prompt(query, context["documents"], context["price_data"])
+    prompt = _build_prompt(query, context["documents"], context["price_data"], history=history)
     raw_narrative = generate_structured(prompt, schema=_AnswerNarrative)
     narrative = _AnswerNarrative.model_validate(raw_narrative)
 
