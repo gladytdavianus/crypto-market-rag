@@ -36,3 +36,4 @@ notebooks/.ipynb_checkpoints/
 .DS_Store
 logs/
 *.log
+.mypy_cache/

@@ -14,7 +14,7 @@ def embed_text(text: str) -> list[float]:
     """
     client = ollama.Client(host=settings.ollama_host)
     response = client.embeddings(model=settings.ollama_embedding_model, prompt=text)
-    return response["embedding"]
+    return list(response["embedding"])
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:

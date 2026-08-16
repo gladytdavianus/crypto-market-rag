@@ -7,37 +7,6 @@ from rag_src.utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 
-def _get_latest_prices(coin_ids: list[str]) -> list[dict]:
-    """Fetch the latest known price for each coin_id from fact_coin_prices.
-
-    This is the anti-corruption layer in practice: the ONLY function in the
-    entire codebase allowed to assume that a generic entity_id (for
-    entity_type="coin") is the same string as the legacy fact_coin_prices/
-    dim_coins coin_id. Every other module stays fully generic.
-
-    Uses rag_user, which only has SELECT on fact_coin_prices/dim_coins —
-    this can read prices but can never modify pipeline data.
-    """
-    if not coin_ids:
-        return []
-
-    with psycopg.connect(settings.postgres_dsn) as conn, conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT DISTINCT ON (coin_id)
-                coin_id, price_usd, market_cap_usd, volume_24h_usd, price_date
-            FROM fact_coin_prices
-            WHERE coin_id = ANY(%s)
-            ORDER BY coin_id, price_date DESC
-            """,
-            (coin_ids,),
-        )
-        rows = cur.fetchall()
-        columns = [desc[0] for desc in cur.description]
-
-    return [dict(zip(columns, row, strict=True)) for row in rows]
-
-
 def get_top_movers(limit: int = 5) -> list[dict]:
     """Compute 24h price change % per coin from fact_coin_prices.
 
@@ -76,6 +45,37 @@ def get_top_movers(limit: int = 5) -> list[dict]:
 
     movers.sort(key=lambda m: abs(m["change_pct"]), reverse=True)
     return movers[:limit]
+
+
+def _get_latest_prices(coin_ids: list[str]) -> list[dict]:
+    """Fetch the latest known price for each coin_id from fact_coin_prices.
+
+    This is the anti-corruption layer in practice: the ONLY function in the
+    entire codebase allowed to assume that a generic entity_id (for
+    entity_type="coin") is the same string as the legacy fact_coin_prices/
+    dim_coins coin_id. Every other module stays fully generic.
+
+    Uses rag_user, which only has SELECT on fact_coin_prices/dim_coins —
+    this can read prices but can never modify pipeline data.
+    """
+    if not coin_ids:
+        return []
+
+    with psycopg.connect(settings.postgres_dsn) as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT DISTINCT ON (coin_id)
+                coin_id, price_usd, market_cap_usd, volume_24h_usd, price_date
+            FROM fact_coin_prices
+            WHERE coin_id = ANY(%s)
+            ORDER BY coin_id, price_date DESC
+            """,
+            (coin_ids,),
+        )
+        rows = cur.fetchall()
+        columns = [desc[0] for desc in cur.description or []]
+
+    return [dict(zip(columns, row, strict=True)) for row in rows]
 
 
 def retrieve_context(query: str, top_k: int = 5) -> dict:

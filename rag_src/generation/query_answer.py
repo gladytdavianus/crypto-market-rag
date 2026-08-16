@@ -29,18 +29,24 @@ def _build_prompt(
     price_data: list[dict],
     history: list[dict] | None = None,
 ) -> str:
-    context_text = "\n\n".join(
-        f"[{doc['entity_type']}] {doc['title']}\n{doc['content']}" for doc in documents
-    ) or "No relevant context found."
+    context_text = (
+        "\n\n".join(f"[{doc['entity_type']}] {doc['title']}\n{doc['content']}" for doc in documents)
+        or "No relevant context found."
+    )
 
-    price_text = "\n".join(
-        f"- {p['coin_id']}: ${p['price_usd']} (as of {p['price_date']})" for p in price_data
-    ) or "No price data available."
+    price_text = (
+        "\n".join(
+            f"- {p['coin_id']}: ${p['price_usd']} (as of {p['price_date']})" for p in price_data
+        )
+        or "No price data available."
+    )
 
     history_text = ""
     if history:
         history_lines = "\n".join(f"{h['role']}: {h['message']}" for h in history)
-        history_text = f"\nPrevious conversation (for context, most recent last):\n{history_lines}\n"
+        history_text = (
+            f"\nPrevious conversation (for context, most recent last):\n{history_lines}\n"
+        )
 
     return f"""You are a crypto market analyst. Answer the user's question using
 ONLY the context and price data below. If the context doesn't contain enough

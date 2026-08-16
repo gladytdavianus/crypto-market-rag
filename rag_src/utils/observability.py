@@ -19,7 +19,9 @@ def start_ingestion_run(source_name: str) -> int:
             "VALUES (%s, 'running') RETURNING id",
             (source_name,),
         )
-        run_id = cur.fetchone()[0]
+        row = cur.fetchone()
+        assert row is not None, "INSERT ... RETURNING id should always return a row"
+        run_id = row[0]
         conn.commit()
 
     logger.info("ingestion_run_started", source_name=source_name, run_id=run_id)

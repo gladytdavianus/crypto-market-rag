@@ -1,4 +1,5 @@
 import psycopg
+from psycopg.types.json import Json
 
 from rag_src.embedding.chunker import chunk_text
 from rag_src.embedding.embedder import embed_text
@@ -55,7 +56,7 @@ def index_document(document: RawDocument, source_name: str) -> int:
                     chunk,
                     document.source_url,
                     document.published_at,
-                    psycopg.types.json.Json(document.metadata),
+                    Json(document.metadata),
                     source_name,
                     chunk_index,
                     embedding,

@@ -11,10 +11,6 @@ from rag_src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
-# CoinTelegraph's public RSS feed - free, no API key required.
-# Note: CoinDesk's RSS was tried first but their summary/content fields
-# come back empty (headline-only feed, no article body). CoinTelegraph's
-# feed includes a full summary, so it was used instead.
 DEFAULT_RSS_URL = "https://cointelegraph.com/rss"
 
 
@@ -53,9 +49,6 @@ class CryptoNewsSource(BaseIngestionSource):
         parsed = feedparser.parse(self.feed_url)
 
         if parsed.bozo:
-            # bozo=True means the feed was malformed but feedparser still
-            # tried its best to parse it. Log it, don't hard-fail — partial
-            # results are still useful.
             logger.warning("rss_feed_malformed", error=str(parsed.bozo_exception))
 
         documents = [self._entry_to_document(entry) for entry in parsed.entries]
@@ -66,8 +59,6 @@ class CryptoNewsSource(BaseIngestionSource):
     def _entry_to_document(self, entry: dict[str, Any]) -> RawDocument:
         url = entry.get("link", "")
 
-        # Stable entity_id derived from the URL, so re-fetching the same
-        # article twice produces the same entity_id (idempotent ingestion).
         entity_id = (
             hashlib.sha256(url.encode("utf-8")).hexdigest()[:16]
             if url
@@ -76,7 +67,8 @@ class CryptoNewsSource(BaseIngestionSource):
 
         published_at = None
         if entry.get("published_parsed"):
-            published_at = datetime(*entry["published_parsed"][:6], tzinfo=UTC)
+            pt = entry["published_parsed"]
+            published_at = datetime(pt[0], pt[1], pt[2], pt[3], pt[4], pt[5], tzinfo=UTC)
 
         raw_content = entry.get("summary") or entry.get("description") or ""
         content = _strip_html(raw_content)
