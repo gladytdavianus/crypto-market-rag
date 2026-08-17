@@ -29,9 +29,7 @@ def test_coin_description_fetch_maps_db_rows_to_raw_documents(mocker):
     fake_conn = MagicMock()
     fake_conn.__enter__.return_value = fake_conn
     fake_conn.cursor.return_value.__enter__.return_value = fake_cursor
-    mocker.patch(
-        "rag_src.ingestion.coin_description.psycopg.connect", return_value=fake_conn
-    )
+    mocker.patch("rag_src.ingestion.coin_description.psycopg.connect", return_value=fake_conn)
 
     docs = CoinDescriptionSource().fetch()
 
@@ -47,9 +45,7 @@ def test_coin_description_fetch_returns_empty_list_when_no_rows(mocker):
     fake_conn = MagicMock()
     fake_conn.__enter__.return_value = fake_conn
     fake_conn.cursor.return_value.__enter__.return_value = fake_cursor
-    mocker.patch(
-        "rag_src.ingestion.coin_description.psycopg.connect", return_value=fake_conn
-    )
+    mocker.patch("rag_src.ingestion.coin_description.psycopg.connect", return_value=fake_conn)
 
     docs = CoinDescriptionSource().fetch()
 

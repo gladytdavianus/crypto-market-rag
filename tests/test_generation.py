@@ -37,12 +37,8 @@ def test_generate_daily_report_numbers_come_from_sql_not_llm(mocker):
     fake_context = {"documents": [], "price_data": []}
     fake_narrative = {"summary": "Calm day.", "market_sentiment": "neutral"}
 
-    mocker.patch(
-        "rag_src.generation.report_generator.get_top_movers", return_value=fake_movers
-    )
-    mocker.patch(
-        "rag_src.generation.report_generator.retrieve_context", return_value=fake_context
-    )
+    mocker.patch("rag_src.generation.report_generator.get_top_movers", return_value=fake_movers)
+    mocker.patch("rag_src.generation.report_generator.retrieve_context", return_value=fake_context)
     mock_llm = mocker.patch(
         "rag_src.generation.report_generator.generate_structured",
         return_value=fake_narrative,

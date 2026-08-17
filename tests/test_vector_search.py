@@ -16,8 +16,15 @@ def test_search_similar_returns_dicts_with_similarity_field(mocker):
     fake_cursor = mocker.MagicMock()
     fake_cursor.fetchall.return_value = fake_rows
     fake_cursor.description = [
-        ("entity_id",), ("entity_type",), ("title",), ("content",), ("source_url",),
-        ("published_at",), ("metadata",), ("source_name",), ("similarity",),
+        ("entity_id",),
+        ("entity_type",),
+        ("title",),
+        ("content",),
+        ("source_url",),
+        ("published_at",),
+        ("metadata",),
+        ("source_name",),
+        ("similarity",),
     ]
     fake_conn = mocker.MagicMock()
     fake_conn.__enter__.return_value = fake_conn
@@ -37,8 +44,15 @@ def test_search_similar_with_entity_type_filter_adds_where_clause(mocker):
     fake_cursor = mocker.MagicMock()
     fake_cursor.fetchall.return_value = []
     fake_cursor.description = [
-        ("entity_id",), ("entity_type",), ("title",), ("content",), ("source_url",),
-        ("published_at",), ("metadata",), ("source_name",), ("similarity",),
+        ("entity_id",),
+        ("entity_type",),
+        ("title",),
+        ("content",),
+        ("source_url",),
+        ("published_at",),
+        ("metadata",),
+        ("source_name",),
+        ("similarity",),
     ]
     fake_conn = mocker.MagicMock()
     fake_conn.__enter__.return_value = fake_conn

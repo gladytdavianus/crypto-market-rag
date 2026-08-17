@@ -25,8 +25,7 @@ class CoinDescriptionSource(BaseIngestionSource):
     def fetch(self) -> list[RawDocument]:
         with psycopg.connect(settings.postgres_dsn) as conn, conn.cursor() as cur:
             cur.execute(
-                "SELECT coin_id, name, description FROM dim_coins "
-                "WHERE description IS NOT NULL"
+                "SELECT coin_id, name, description FROM dim_coins " "WHERE description IS NOT NULL"
             )
             rows = cur.fetchall()
 

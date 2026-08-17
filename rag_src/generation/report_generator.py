@@ -25,13 +25,15 @@ class _ReportNarrative(BaseModel):
 
 
 def _build_prompt(top_movers: list[dict], documents: list[dict]) -> str:
-    movers_text = "\n".join(
-        f"- {m['coin_id']}: {m['change_pct']:+.2f}%" for m in top_movers
-    ) or "No price movement data available."
+    movers_text = (
+        "\n".join(f"- {m['coin_id']}: {m['change_pct']:+.2f}%" for m in top_movers)
+        or "No price movement data available."
+    )
 
-    context_text = "\n\n".join(
-        f"[{doc['entity_type']}] {doc['title']}\n{doc['content']}" for doc in documents
-    ) or "No additional context available."
+    context_text = (
+        "\n\n".join(f"[{doc['entity_type']}] {doc['title']}\n{doc['content']}" for doc in documents)
+        or "No additional context available."
+    )
 
     return f"""You are a crypto market analyst. Based on the data below, write a
 brief market summary (2-4 sentences) and judge the overall market sentiment.
