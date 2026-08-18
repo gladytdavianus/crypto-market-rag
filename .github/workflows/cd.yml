@@ -1,8 +1,6 @@
 name: Build & Push Docker Image
 
 on:
-  push:
-    branches: [master]
   workflow_run:
     workflows: ["Lint & Test"]
     types:
@@ -11,7 +9,10 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+    # Only build/push after Lint & Test succeeds. No push-event bypass -
+    # a broken commit should never reach the container registry, regardless
+    # of how the workflow got triggered.
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
       packages: write

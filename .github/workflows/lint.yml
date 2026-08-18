@@ -19,6 +19,6 @@ jobs:
       - name: Run Ruff (format check)
         run: poetry run ruff format --check .
       - name: Run mypy
-        run: poetry run mypy rag_src/
+        run: poetry run mypy -p rag_src
       - name: Run tests
         run: poetry run python -m pytest -v
