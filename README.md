@@ -83,6 +83,11 @@ graph TD
 ```
 crypto-market-rag/
 │
+├── .github/
+│   └── workflows/
+│       ├── lint.yml                    ruff, mypy, pytest, runs on every push and PR
+│       └── cd.yml                      builds and pushes a Docker image to ghcr.io after lint.yml succeeds
+│
 ├── rag_src/                            (the reusable package, path-imported by crypto-telegram-bot)
 │   ├── schemas/                         Pydantic contracts
 │   │   ├── raw_document.py              generic ingestion output (entity_id/entity_type)
@@ -122,6 +127,7 @@ crypto-market-rag/
 ├── Dockerfile                            this project's own Airflow image
 ├── docker-compose.yml                    own Airflow (webserver, scheduler, metadata DB), port 8081
 ├── pyproject.toml                        packages = [{include = "rag_src"}], for path-dependency reuse
+├── .pre-commit-config.yaml               ruff, mypy, and basic hygiene hooks, run locally before commit
 └── .env.example
 ```
 
@@ -140,6 +146,8 @@ crypto-market-rag/
 | Schema validation | Pydantic v2 | Used for both data contracts and LLM structured output |
 | CLI | Typer + Rich | |
 | Testing | pytest + pytest-mock | 42 tests, 99% coverage |
+| Linting and types | ruff, mypy | Both run in CI and as pre-commit hooks |
+| CI/CD | GitHub Actions | `lint.yml` runs ruff, mypy, and pytest on every push and PR. `cd.yml` builds and pushes a Docker image to `ghcr.io`, only after `lint.yml` succeeds |
 
 ---
 
@@ -287,15 +295,20 @@ docker exec -it $(docker ps -qf "name=airflow-scheduler") \
 
 ```bash
 poetry run python -m pytest -v
+poetry run ruff check .
+poetry run ruff format --check .
+poetry run mypy -p rag_src
 ```
 
-Note: `poetry run pytest` on its own fails with `ModuleNotFoundError: No module named 'rag_src'`. It does not add the project root to `sys.path`. Use `python -m pytest`, not bare `pytest`.
+Note: `poetry run pytest` on its own fails with `ModuleNotFoundError: No module named 'rag_src'`. It does not add the project root to `sys.path`. Use `python -m pytest`, not bare `pytest`. `mypy` needs `-p rag_src` (package mode) rather than `mypy rag_src/`, or it raises "Source file found twice under different module names" once `crypto-telegram-bot` is installed as a path dependency alongside it.
 
 42 tests span 10 files, one per source module. A few worth calling out:
 
 - `test_generate_daily_report_numbers_come_from_sql_not_llm` asserts that `top_movers` never appears in the JSON schema sent to the LLM.
 - `test_retrieve_context_only_queries_prices_for_coin_entities` asserts that a news article's `entity_id` never reaches the price-lookup query.
 - `test_query_command_prints_answer_and_sources` is a regression test for a `rich` markup bug, see Troubleshooting item 6.
+
+All four commands above run on every push and pull request through `.github/workflows/lint.yml`. `.github/workflows/cd.yml` runs after, and only builds and pushes the Docker image if `lint.yml` passed, so a broken commit never reaches the image registry. `.pre-commit-config.yaml` runs ruff and mypy locally before each commit, catching most of this before it ever reaches CI.
 
 ---
 
@@ -405,4 +418,4 @@ Issues and pull requests are open.
 
 ---
 
-*Last updated: August 2026*
+*Last updated: August 19, 2026*
